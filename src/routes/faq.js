@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import { body, query, validationResult } from 'express-validator';
 import FAQ from '../models/FAQ.js';
-// import cacheService from '../services/cache.js';
+import cacheService from '../services/cache.js';
 import translationService from '../services/translator.js';
 
 // Create new FAQ
@@ -40,13 +40,13 @@ router.get('/', [
 ], async (req, res) => {
   try {
     const lang = req.query.lang || 'en';
-    // const cacheKey = `faqs_${lang}`;
+    const cacheKey = `faqs_${lang}`;
     
     // Try to get from cache
-    // const cachedData = await cacheService.get(cacheKey);
-    // if (cachedData) {
-    //   return res.json(cachedData);
-    // }
+    const cachedData = await cacheService.get(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
 
     // Get from database
     const faqs = await FAQ.find({ isActive: true });
@@ -58,7 +58,7 @@ router.get('/', [
     })));
 
     // Cache the results
-    // await cacheService.set(cacheKey, translatedFaqs);
+    await cacheService.set(cacheKey, translatedFaqs);
     res.json(translatedFaqs);
   } catch (error) {
     res.status(500).json({ error: error.message });
