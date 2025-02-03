@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FAQ Admin</title>
+    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+</head>
+<body>
+    <div id="faq-form">
+        <h2>Create/Edit FAQ</h2>
+        <form id="faqForm">
+            <div>
+                <label>Question (English):</label>
+                <input type="text" id="question" required>
+            </div>
+            <div>
+                <label>Answer (English):</label>
+                <textarea id="answer" required></textarea>
+            </div>
+            <button type="submit">Save FAQ</button>
+        </form>
+    </div>
+
+    <script>
+        CKEDITOR.replace('answer');
+
+        document.getElementById('faqForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = {
+                question: document.getElementById('question').value,
+                answer: CKEDITOR.instances.answer.getData()
+            };
+
+            try {
+                const response = await fetch('/api/faqs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    alert('FAQ saved successfully!');
+                    document.getElementById('faqForm').reset();
+                    CKEDITOR.instances.answer.setData('');
+                } else {
+                    alert('Error saving FAQ');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving FAQ');
+            }
+        };
+    </script>
+</body>
+</html>
